@@ -1,5 +1,5 @@
 import http from "http";
-import { WebSocketServer } from "ws";
+import { Server } from "socket.io";
 import express from "express";
 
 const app = express();
@@ -10,12 +10,14 @@ app.use("/public", express.static("src/public"));
 app.get("/", (req, res) => res.render("home"));
 app.get("/*", (req, res) => res.redirect("/"));
 
-const handleListen = () => console.log(`Listening on http://localhost:3000`);
+const httpServer = http.createServer(app);
+const wsServer = new Server(httpServer);
 
-const server = http.createServer(app);
-const wss = new WebSocketServer({ server });
+wsServer.on("connection", (socket) => {
+  console.log(socket);
+});
 
-const sockets = [];
+/* const sockets = [];
 
 wss.on("connection", (socket) => {
   sockets.push(socket);
@@ -27,14 +29,15 @@ wss.on("connection", (socket) => {
     switch (message.type) {
       case "new_message":
         sockets.forEach((aSocket) =>
-          aSocket.send(`${socket.nickname}: ${message.payload}`)
+        aSocket.send(`${socket.nickname}: ${message.payload}`)
         );
         break;
-      case "nickname":
-        socket["nickname"] = message.payload;
-        break;
-    }
-  });
-});
+        case "nickname":
+          socket["nickname"] = message.payload;
+          break;
+        }
+      });
+    }); */
 
-server.listen(3000, handleListen);
+const handleListen = () => console.log(`Listening on http://localhost:3000`);
+httpServer.listen(3000, handleListen);
